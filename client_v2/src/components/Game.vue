@@ -2,14 +2,14 @@
     <div class="gamewrap">
         <div class='boardwrap'>
             <p class="username">{{username}}</p>
-            <b-list-group deck class='board'>
-                <b-list-group-item href="#" bg-variant="light" header="Light" v-for="(cell,index) in 9"
+            <div class='board'>
+                <div v-for="(cell,index) in 9"
                 :key="index"
                 :class="myClass"
                 :id="index"
                 @click="PlayerTurn"
-                ></b-list-group-item>               
-            </b-list-group>
+                ></div>                
+            </div> 
         </div>
         <div class="statswrap">
             <b-list-group>
@@ -19,14 +19,13 @@
             </b-list-group>
         </div>
         <div class="middlewrap">
-            <!-- <b-button variant="warning">Warning</b-button> -->
             <b-button variant="warning" @click="createLobby" v-if="createVisible">Найти оппонента</b-button>
             <b-button variant="warning" @click="deleteLobby" v-if="!createVisible && !ingame">Отменить поиск</b-button>
-            <b-button variant="warning" @click="startOver" v-if="youWin || youLose">Выйти из поединка</b-button>
+            <b-button variant="warning" @click="startOver" v-if="youWin || youLose || Draw">Выйти из поединка</b-button>
             <figure v-if="ingame">
                 <figcaption> Вы играете за </figcaption>
                 <p>
-                    <img v-bind:src="url" alt="img.descr">
+                    <img v-bind:src="url" alt="img.descr" >
                 </p>
             </figure>
             <p v-if="ingame">{{turnText}}</p>
@@ -151,7 +150,8 @@ export default {
             this.myUnit=""
             this.myLobby=""
             this.youWin=false
-            this.youLose=false  
+            this.youLose=false
+            this.Draw=false    
         }
 
     },
@@ -193,6 +193,10 @@ export default {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+}
+figure img{
+    width: 100px;
+    height: 100px;
 }
 .board{
     width: 270px;

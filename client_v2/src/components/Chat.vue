@@ -5,12 +5,12 @@
             <b-list-group>
                 <b-list-group-item :variant="getvariant(message.username)" v-for="(message,index) in messages"
                 :key="index"
-                >{{message.time}}|{{message.username}}: {{message.text}}</b-list-group-item>
+                >{{message.time}}|<span style="font-weight: 900">{{message.username}}</span>: {{message.text}}</b-list-group-item>
             </b-list-group>   
           </div>
           <div class="input">
-            <b-form-input type="text" v-model="textMessage"></b-form-input>
-            <b-button variant="dark" @click="sendMessage">Отправить</b-button>
+            <b-form-input type="text" id="myInput" v-model="textMessage"></b-form-input>
+            <b-button variant="dark" id="myBtn" @click="sendMessage">Отправить</b-button>
           </div>
       </div>
       <div class="usersList">
@@ -64,6 +64,10 @@ export default {
       this.ingame=false
       this.textMessage=""
     },
+    Draw: function () {
+      this.ingame=false
+      this.textMessage=""
+    },
   },
   methods:{
     sendMessage(){
@@ -89,8 +93,16 @@ export default {
       var myDiv = document.querySelector(".textarea")
       myDiv.scrollTop = myDiv.scrollHeight 
     })
-  }
-
+  },
+  mounted: function () {
+      var input = document.getElementById("myInput");
+      input.addEventListener("keyup", function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          document.getElementById("myBtn").click();
+        }
+      });
+    },
 }
 </script>
 

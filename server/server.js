@@ -1,15 +1,23 @@
+const PORT = process.env.PORT || 8080;
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
 const cors = require('cors');
 var moment = require('moment');
-moment.locale('ru');  
+moment.locale('ru');
+const path = require("path");
+app.use(express.static(__dirname + '/views'));
+
+server.listen(PORT, function () {
+    console.log('Server started!');
+})
+
+
 
 let mongoClient = require('mongodb').MongoClient;
-let url = 'mongodb://localhost:27017';
+let url = 'mongodb+srv://egor:egor@cluster0.70pzh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 
-app.use(express.static('./dist'));
-app.listen('8080')
+app.use(express.static(__dirname + '/dist'))
 
 const corsOptions = {
   credentials: true
@@ -18,24 +26,20 @@ const corsOptions = {
 app.use(cors(corsOptions));
 const io = require('socket.io')(server,{
 	cors: { 
-		origin: "http://localhost:8080", 
+		origin: PORT, 
 		methods: ["GET", "POST"], 
 		transports: ['websocket', 'polling'], 
 		credentials: true 
 	}, 
 	allowEIO3: true
 });
-server.listen(3000, function () {
-    console.log('Server started!');
-});
-
 
 let users=[]
 let lobbies=[]
 let m=(username,text)=>({username, text, time:moment().format('LT')})
 mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client)=>{
 	if(err){
-		return console.log("ошибка1");
+		return console.log("ошибка подключения");
 	}
     io.on('connection', function (socket) {
         let collection=client.db('test').collection("users");
@@ -56,8 +60,7 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                     if(err){
                         return console.log("ошибка2",err);
                     }
-                    console.log("Пользователь зарегистрирован");
-                    /* client.close(); */
+                    return cb ("Пользователь зарегистрирован");
                 })
                 
             })
@@ -197,6 +200,9 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                 socket.emit('youWin');
                 socket.broadcast
                     .to(data.lobbyName)
+                    .emit('PlayerTurn', data);
+                socket.broadcast
+                    .to(data.lobbyName)
                     .emit('youLose')
 
             }else if(data.drawTrigger==0){
@@ -269,11 +275,14 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                     lobbies.splice(index,1)
                     io.to("mainroom").emit('getLobbies',lobbies)
                 }
+                console.log("users",users)
                 let userLeaving=users.find(user => user.id==socket.id)
+                console.log("userLeaving",userLeaving)
+                io.emit('newMessage',m('admin',`${userLeaving.username} покинул игру`))
                 let userIndex=users.findIndex(user => user.id==socket.id)
                 users.splice(userIndex,1)
                 io.emit('getUsers',users)
-                io.emit('newMessage',m('admin',`${userLeaving.username} покинул игру`))
+                
             }
         })
     }); 
