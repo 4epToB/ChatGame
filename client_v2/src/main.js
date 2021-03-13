@@ -19,7 +19,7 @@ const router = new VueRouter({
 });
 Vue.use(new VueSocketIO({
     debug: true,
-    connection: SocketIO('http://localhost:3000',{ transport : ['polling', 'websocket'] }),
+    connection: SocketIO('https://chatgamev2.herokuapp.com',{ transport : ['polling', 'websocket'] }),
   })
 );
  

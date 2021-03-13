@@ -8,8 +8,8 @@ moment.locale('ru');
 let mongoClient = require('mongodb').MongoClient;
 let url = 'mongodb://localhost:27017';
 
-/* app.use(express.static('../client_v2/dist'));
-app.listen('8080') */
+app.use(express.static('./dist'));
+app.listen('8080')
 
 const corsOptions = {
   credentials: true
