@@ -17,7 +17,6 @@ server.listen(PORT, function () {
 let mongoClient = require('mongodb').MongoClient;
 let url = 'mongodb+srv://egor:egor@cluster0.70pzh.mongodb.net/myFirstDatabase?retryWrites=true&w=majority';
 
-app.use(express.static(__dirname + '/dist'))
 
 const corsOptions = {
   credentials: true
