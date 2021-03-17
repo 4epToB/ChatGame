@@ -35,7 +35,8 @@ const io = require('socket.io')(server,{
 
 let users=[]
 let lobbies=[]
-let m=(username,text)=>({username, text, time:moment().format('LT')})
+
+let m=(username,text,lobbyname)=>({username, text, lobbyname,time:moment().format('LT')})
 mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (err, client)=>{
 	if(err){
 		return console.log("ошибка подключения");
@@ -89,13 +90,13 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                         socket.join("mainroom")
                         cb(user)
                         socket.emit('loggedIn',user)
-                        socket.emit('newMessage',m('admin',`Привет ${formdata.username}`))
+                        socket.emit('newMessage',m('admin',`Привет ${formdata.username}`,''))
                         io.emit('getUsers',users)
                         console.log("Количество лобби",lobbies.length)
                         socket.emit('getLobbies',lobbies)
                         socket.broadcast
                             .to("mainroom")
-                            .emit('newMessage',m('admin',`Смотрите кто к нам пришел, да это же ${formdata.username}!!`))
+                            .emit('newMessage',m('admin',`Смотрите кто к нам пришел, да это же ${formdata.username}!!`,''))
                     }else {
                         return cb("Пароль неверный")
                     }
@@ -109,11 +110,11 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                 let lobbyToSend = lobbies.find(lobby => lobby.hasOwnProperty(socket.id))
                 if(lobbyToSend){
                     let regMessage=message.textMessage.substring(1)
-                    io.to(lobbyToSend.lobbyName).emit('newMessage',m(message.username,regMessage))
+                    io.to(lobbyToSend.lobbyName).emit('newMessage',m(message.username,regMessage,lobbyToSend.lobbyName))
                 }
                 return
             }
-            io.to("mainroom").emit('newMessage',m(message.username,message.textMessage))
+            io.to("mainroom").emit('newMessage',m(message.username,message.textMessage,''))
         })
         
         socket.on("createLobby",(username,cb)=>{
@@ -154,9 +155,9 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
             socket.join(lobyToConnect.lobbyName)
             console.log('Список лобби',lobbies)
             socket.emit("setOponent",{turn:!lobyToConnect.turn,unit:!lobyToConnect.unit,lobbyname:lobyToConnect.lobbyName})
-            io.to(lobyToConnect.lobbyName).emit('newMessage',m('admin',"Бейтесь до конца"))
+            io.to(lobyToConnect.lobbyName).emit('newMessage',m('admin',"Бейтесь до конца",''))
             io.to(lobyToConnect.lobbyName).emit('gameStart')
-            io.to("mainroom").emit('newMessage',m('admin',`Между ${usersInLobby.username} и ${usersInLobby.username2} начался махач!`))
+            io.to("mainroom").emit('newMessage',m('admin',`Между ${usersInLobby.username} и ${usersInLobby.username2} начался махач!`,''))
             io.to("mainroom").emit('getLobbies',lobbies)
 
         })
@@ -256,7 +257,7 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                     }else{
                         console.log("вышел не сервер")
                         collection.updateOne(
-                            {username:lobbyToleave.username2},
+                            { username:lobbyToleave.username2},
                             { $inc: {games: 1}}
                         )
                         collection.updateOne(
@@ -275,12 +276,16 @@ mongoClient.connect(url, { useNewUrlParser: true, useUnifiedTopology: true }, (e
                     io.to("mainroom").emit('getLobbies',lobbies)
                 }
                 console.log("users",users)
-                let userLeaving=users.find(user => user.id==socket.id)
-                console.log("userLeaving",userLeaving)
-                io.emit('newMessage',m('admin',`${userLeaving.username} покинул игру`))
-                let userIndex=users.findIndex(user => user.id==socket.id)
-                users.splice(userIndex,1)
-                io.emit('getUsers',users)
+                console.log("userLeavingid",socket.id)
+                let userLeaving
+                if(userLeaving=users.find(user => user.id==socket.id)){
+                    console.log("userLeaving",userLeaving)
+                    io.emit('newMessage',m('admin',`${userLeaving.username} покинул игру`,''))
+                    let userIndex=users.findIndex(user => user.id==socket.id)
+                    users.splice(userIndex,1)
+                    io.emit('getUsers',users)
+                }
+                
                 
             }
         })

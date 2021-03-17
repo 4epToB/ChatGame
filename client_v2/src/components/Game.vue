@@ -23,10 +23,8 @@
             <b-button variant="warning" @click="deleteLobby" v-if="!createVisible && !ingame">Отменить поиск</b-button>
             <b-button variant="warning" @click="startOver" v-if="youWin || youLose || Draw">Выйти из поединка</b-button>
             <figure v-if="ingame">
-                <figcaption> Вы играете за </figcaption>
-                <p>
-                    <img v-bind:src="url" alt="img.descr" >
-                </p>
+                <figcaption> Вы играете за: </figcaption>
+                <img v-bind:src="url" alt="img.descr" >
             </figure>
             <p v-if="ingame">{{turnText}}</p>
         </div>
@@ -197,6 +195,10 @@ export default {
 figure img{
     width: 100px;
     height: 100px;
+    margin-top: 25px;
+}
+figure{
+    margin-top: 50px;
 }
 .board{
     width: 270px;
