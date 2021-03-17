@@ -178,6 +178,7 @@ export default {
     }
     .tomeMessage{
       text-decoration: underline;
+      font-weight: 700;
     }
     .usersList{
       height: 100%;
